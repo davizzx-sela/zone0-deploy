@@ -2,60 +2,26 @@ name: Deploy Zona Zero
 
 on:
   workflow_dispatch:
-    inputs:
-      deploy_supabase:
-        description: 'Aplicar migrations no Supabase'
-        type: boolean
-        default: true
-      deploy_vercel:
-        description: 'Publicar site na Vercel'
-        type: boolean
-        default: true
-
-permissions:
-  contents: read
-
-concurrency:
-  group: zone0-public-deploy
-  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Clonar repositório privado (temporário)
-        if: ${{ inputs.deploy_supabase }}
+      - name: Baixar código do repositório privado
         uses: actions/checkout@v4
         with:
           repository: ${{ secrets.ZONE0_REPO }}
           token: ${{ secrets.ZONE0_GITHUB_TOKEN }}
-          ref: main
-          fetch-depth: 1
 
-      - name: Setup Supabase CLI
-        if: ${{ inputs.deploy_supabase }}
+      - name: Instalar Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: latest
 
-      - name: Push Supabase Migrations
-        if: ${{ inputs.deploy_supabase }}
+      - name: Deploy Supabase Migrations
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          supabase init --force
-          supabase link --project-ref lasiedmfllanxoadsrys
-          supabase db push --remote --include-all --yes
-
-      - name: Disparar Deploy na Vercel
-        if: ${{ inputs.deploy_vercel }}
-        env:
-          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
-        run: |
-          if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
-            curl -fsS -X POST "$VERCEL_DEPLOY_HOOK" > /dev/null
-            echo "Deploy da Vercel disparado."
-          else
-            echo "VERCEL_DEPLOY_HOOK não configurado (pulando)."
-          fi
+          supabase link --project-ref SEU_PROJECT_REF_AQUI
+          supabase db push
+          
