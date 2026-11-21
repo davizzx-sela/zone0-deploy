@@ -22,6 +22,8 @@ jobs:
 
       - name: Instalar Supabase CLI
         uses: supabase/setup-cli@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         with:
           version: latest
 
