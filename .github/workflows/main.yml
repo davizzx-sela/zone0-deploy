@@ -1,0 +1,27 @@
+name: Deploy Zona Zero
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar código do repositório privado
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.ZONE0_REPO }}
+          token: ${{ secrets.ZONE0_GITHUB_TOKEN }}
+
+      - name: Instalar Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy Supabase Migrations
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          supabase link --project-ref SEU_PROJECT_REF_AQUI
+          supabase db push
+          
